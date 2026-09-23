@@ -2,7 +2,7 @@
 
 ## Created By
 
-- Name:
+- Name: Alexander Leó Hafsteinsson
 - Date Completed:
 
 ---
