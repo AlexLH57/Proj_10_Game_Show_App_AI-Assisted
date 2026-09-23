@@ -1,0 +1,38 @@
+{
+  "easy": [
+    "cat",
+    "dog",
+    "sun",
+    "car",
+    "hat",
+    "run",
+    "box",
+    "red",
+    "cup",
+    "map"
+  ],
+  "medium": [
+    "planet",
+    "silver",
+    "castle",
+    "rocket",
+    "forest",
+    "camera",
+    "winter",
+    "button",
+    "orange",
+    "bridge"
+  ],
+  "hard": [
+    "pineapple",
+    "blueberry",
+    "nightmare",
+    "admirable",
+    "breakdown",
+    "something",
+    "dangerous",
+    "wonderful",
+    "different",
+    "beautiful"
+  ]
+}
