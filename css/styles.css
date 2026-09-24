@@ -58,7 +58,7 @@
   --color-letter-revealed-bg: #39ff14;
 }
 
-/* main */
+/* Main */
 
 * {
   font-family: "Open Sans", sans-serif;
@@ -209,6 +209,7 @@ header#banner .header {
   justify-content: center;
   position: fixed;
   inset: 0;
+  z-index: 10;
   border-radius: var(--radius);
   color: var(--color-text-inverse);
 }

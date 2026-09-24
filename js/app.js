@@ -13,6 +13,7 @@ let selectedDifficulty = "";
 let selectedLifeIcon = "";
 let currentWord = "";
 let currentStreak = 0;
+let gameActive = false;
 
 // Picks a random word from the selected difficulty list so the game can start.
 async function getRandomWordAsArray() {
@@ -66,6 +67,8 @@ function removeLife() {
 
 // Handles a guessed letter from the keyboard or the on-screen buttons.
 function handleInteraction(button) {
+  if (!gameActive) return;
+
   button.disabled = true;
   button.classList.add("chosen");
 
@@ -140,6 +143,8 @@ function checkWin() {
   const gameTitle = document.getElementById("game-title");
 
   if (shownLetters.length === letters.length) {
+    gameActive = false;
+
     currentStreak++;
     saveCurrentStreak();
     updateBestStreak();
@@ -152,6 +157,8 @@ function checkWin() {
     showStreaks();
     showEndGameButtons();
   } else if (missed >= 5) {
+    gameActive = false;
+    
     currentStreak = 0;
     saveCurrentStreak();
 
@@ -236,6 +243,7 @@ function showEndGameButtons() {
     buttonContainer.remove();
 
     resetGameBoard();
+    gameActive = true;
 
     const wordArray = await getRandomWordAsArray();
 
@@ -266,8 +274,11 @@ function showEndGameButtons() {
   });
 }
 
+// Starts a new game using the selected difficulty and life icon.
 setupForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+
+  gameActive = true;
 
   selectedDifficulty = difficultySelect.value;
   selectedLifeIcon = lifeIconSelect.value;
@@ -289,12 +300,14 @@ setupForm.addEventListener("submit", async (event) => {
   overlay.style.display = "none";
 });
 
+// Handles guesses made with the on-screen keyboard.
 qwerty.addEventListener("click", (event) => {
   if (event.target.tagName === "BUTTON") {
     handleInteraction(event.target);
   }
 });
 
+// Allows the player to make guesses using the physical keyboard.
 document.addEventListener("keydown", (event) => {
   const pressedKey = event.key.toLowerCase();
 
