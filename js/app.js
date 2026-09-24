@@ -13,6 +13,7 @@ const overlay = document.getElementById("overlay");
 let selectedDifficulty = "";
 let selectedLifeIcon = "";
 let currentWord = "";
+let currentStreak = 0;
 
 async function getRandomWordAsArray() {
   const response = await fetch("./answers.json");
@@ -74,21 +75,81 @@ function handleInteraction(button) {
   checkWin();
 }
 
+function getBestStreakKey() {
+  return `bestStreak_${selectedDifficulty}`;
+}
+
+function getCurrentStreakKey() {
+  return `currentStreak_${selectedDifficulty}`;
+}
+
+function getBestStreak() {
+  const savedBestStreak = localStorage.getItem(getBestStreakKey());
+
+  return savedBestStreak ? Number(savedBestStreak) : 0;
+}
+
+function getCurrentStreak() {
+  const savedCurrentStreak = localStorage.getItem(getCurrentStreakKey());
+
+  return savedCurrentStreak ? Number(savedCurrentStreak) : 0;
+}
+
+function updateBestStreak() {
+  const bestStreak = getBestStreak();
+
+  if (currentStreak > bestStreak) {
+    localStorage.setItem(getBestStreakKey(), currentStreak);
+  }
+}
+
+function saveCurrentStreak() {
+  localStorage.setItem(getCurrentStreakKey(), currentStreak);
+}
+
+function showStreaks() {
+  const bestStreak = getBestStreak();
+
+  const streakText = document.createElement("p");
+  streakText.className = "streak-text";
+  streakText.textContent = `Current Streak: ${currentStreak}`;
+
+  const bestText = document.createElement("p");
+  bestText.className = "streak-text";
+  bestText.textContent = `Best Streak: ${bestStreak}`;
+
+  overlay.appendChild(streakText);
+  overlay.appendChild(bestText);
+}
+
 function checkWin() {
   const letters = document.querySelectorAll(".letter");
   const shownLetters = document.querySelectorAll(".letter.show");
   const gameTitle = document.getElementById("game-title");
 
   if (shownLetters.length === letters.length) {
+    currentStreak++;
+    saveCurrentStreak();
+    updateBestStreak();
+
     overlay.className = "win";
     overlay.style.display = "flex";
     setupForm.style.display = "none";
     gameTitle.textContent = "You Win!";
+
+    showStreaks();
+    showEndGameButtons();
   } else if (missed >= 5) {
+    currentStreak = 0;
+    saveCurrentStreak();
+
     overlay.className = "lose";
     overlay.style.display = "flex";
     setupForm.style.display = "none";
     gameTitle.textContent = "You Lose!";
+
+    showStreaks();
+    showEndGameButtons();
   }
 }
 
@@ -97,7 +158,7 @@ async function getDefinition(word) {
 
   try {
     const response = await fetch(
-      `https://api.datamuse.com/words?sp=${word}&md=d&max=1`
+      `https://api.datamuse.com/words?sp=${word}&md=d&max=1`,
     );
 
     const data = await response.json();
@@ -112,11 +173,90 @@ async function getDefinition(word) {
   }
 }
 
+function resetGameBoard() {
+  missed = 0;
+
+  const wordList = word.querySelector("ul");
+  wordList.innerHTML = "";
+
+  const buttons = qwerty.querySelectorAll("button");
+
+  buttons.forEach((button) => {
+    button.disabled = false;
+    button.classList.remove("chosen");
+  });
+
+  const lifeImages = document.querySelectorAll(".tries img");
+
+  lifeImages.forEach((img) => {
+    img.src = `./images/live${selectedLifeIcon}.png`;
+  });
+
+  const definitionText = document.querySelector("#definition p");
+  definitionText.textContent = "";
+}
+
+function showEndGameButtons() {
+  const buttonContainer = document.createElement("div");
+  buttonContainer.className = "button-container";
+
+  const playAgainButton = document.createElement("button");
+  playAgainButton.className = "btn_reset";
+  playAgainButton.textContent = "Play Again";
+
+  const homeButton = document.createElement("button");
+  homeButton.className = "btn_home";
+  homeButton.textContent = "Home";
+
+  buttonContainer.appendChild(playAgainButton);
+  buttonContainer.appendChild(homeButton);
+
+  overlay.appendChild(buttonContainer);
+
+  playAgainButton.addEventListener("click", async () => {
+    document.querySelectorAll(".streak-text").forEach((text) => {
+      text.remove();
+    });
+
+    buttonContainer.remove();
+
+    resetGameBoard();
+
+    const wordArray = await getRandomWordAsArray();
+
+    currentWord = wordArray.join("");
+
+    addWordToDisplay(wordArray);
+    getDefinition(currentWord);
+
+    overlay.style.display = "none";
+  });
+
+  homeButton.addEventListener("click", () => {
+    document.querySelectorAll(".streak-text").forEach((text) => {
+      text.remove();
+    });
+
+    buttonContainer.remove();
+
+    resetGameBoard();
+
+    overlay.className = "start";
+    overlay.style.display = "flex";
+
+    setupForm.style.display = "block";
+
+    const gameTitle = document.getElementById("game-title");
+    gameTitle.textContent = "Wheel of Success 2.0";
+  });
+}
+
 setupForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   selectedDifficulty = difficultySelect.value;
   selectedLifeIcon = lifeIconSelect.value;
+  currentStreak = getCurrentStreak();
 
   const lifeImages = document.querySelectorAll(".tries img");
 
@@ -149,10 +289,7 @@ document.addEventListener("keydown", (event) => {
     const buttons = qwerty.querySelectorAll("button");
 
     buttons.forEach((button) => {
-      if (
-        button.textContent.toLowerCase() === pressedKey &&
-        !button.disabled
-      ) {
+      if (button.textContent.toLowerCase() === pressedKey && !button.disabled) {
         handleInteraction(button);
       }
     });
