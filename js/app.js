@@ -1,4 +1,3 @@
-console.log("Game loaded");
 
 const qwerty = document.getElementById("qwerty");
 const word = document.getElementById("word");
@@ -15,6 +14,7 @@ let selectedLifeIcon = "";
 let currentWord = "";
 let currentStreak = 0;
 
+// Picks a random word from the selected difficulty list so the game can start.
 async function getRandomWordAsArray() {
   const response = await fetch("./answers.json");
   const answers = await response.json();
@@ -27,6 +27,7 @@ async function getRandomWordAsArray() {
   return randomWord.split("");
 }
 
+// Creates the letter tiles for the hidden word and shows them on the page.
 function addWordToDisplay(arr) {
   const wordList = word.querySelector("ul");
 
@@ -39,6 +40,7 @@ function addWordToDisplay(arr) {
   });
 }
 
+// Checks if the guessed letter matches any hidden letter and reveals it if it does.
 function checkLetter(letter) {
   const letters = document.querySelectorAll(".letter");
   let matchFound = false;
@@ -53,6 +55,7 @@ function checkLetter(letter) {
   return matchFound ? letter : null;
 }
 
+// Removes one life when the player guesses a wrong letter.
 function removeLife() {
   const lifeImages = document.querySelectorAll(".tries img");
 
@@ -61,6 +64,7 @@ function removeLife() {
   missed++;
 }
 
+// Handles a guessed letter from the keyboard or the on-screen buttons.
 function handleInteraction(button) {
   button.disabled = true;
   button.classList.add("chosen");
@@ -75,26 +79,31 @@ function handleInteraction(button) {
   checkWin();
 }
 
+// Creates the local storage key name used to remember the best streak for a difficulty.
 function getBestStreakKey() {
   return `bestStreak_${selectedDifficulty}`;
 }
 
+// Creates the local storage key name used to remember the current streak for a difficulty.
 function getCurrentStreakKey() {
   return `currentStreak_${selectedDifficulty}`;
 }
 
+// Reads the saved best streak from the browser storage.
 function getBestStreak() {
   const savedBestStreak = localStorage.getItem(getBestStreakKey());
 
   return savedBestStreak ? Number(savedBestStreak) : 0;
 }
 
+// Reads the saved current streak from the browser storage.
 function getCurrentStreak() {
   const savedCurrentStreak = localStorage.getItem(getCurrentStreakKey());
 
   return savedCurrentStreak ? Number(savedCurrentStreak) : 0;
 }
 
+// Saves a new best streak if the current one beats the old record.
 function updateBestStreak() {
   const bestStreak = getBestStreak();
 
@@ -103,10 +112,12 @@ function updateBestStreak() {
   }
 }
 
+// Saves the current streak so it can be restored later.
 function saveCurrentStreak() {
   localStorage.setItem(getCurrentStreakKey(), currentStreak);
 }
 
+// Shows the current and best streak scores in the game overlay.
 function showStreaks() {
   const bestStreak = getBestStreak();
 
@@ -122,6 +133,7 @@ function showStreaks() {
   overlay.appendChild(bestText);
 }
 
+// Checks whether the player has won or lost and updates the game state.
 function checkWin() {
   const letters = document.querySelectorAll(".letter");
   const shownLetters = document.querySelectorAll(".letter.show");
@@ -153,6 +165,7 @@ function checkWin() {
   }
 }
 
+// Fetches a clue for the current word and displays it on the page.
 async function getDefinition(word) {
   const definitionText = document.querySelector("#definition p");
 
@@ -173,6 +186,7 @@ async function getDefinition(word) {
   }
 }
 
+// Resets the game board so a new round can start cleanly.
 function resetGameBoard() {
   missed = 0;
 
@@ -196,6 +210,7 @@ function resetGameBoard() {
   definitionText.textContent = "";
 }
 
+// Shows the end-of-game options so the player can play again or return home.
 function showEndGameButtons() {
   const buttonContainer = document.createElement("div");
   buttonContainer.className = "button-container";
@@ -270,8 +285,6 @@ setupForm.addEventListener("submit", async (event) => {
 
   addWordToDisplay(wordArray);
   getDefinition(currentWord);
-
-  console.log(wordArray);
 
   overlay.style.display = "none";
 });

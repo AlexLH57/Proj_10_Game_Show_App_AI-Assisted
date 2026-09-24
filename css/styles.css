@@ -150,6 +150,7 @@ header#banner .header {
 .show {
   color: var(--color-letter-revealed);
   background-color: var(--color-letter-revealed-bg);
+  transform: scale(1.1) rotate(2deg);
 }
 
 /* Keyboard */
