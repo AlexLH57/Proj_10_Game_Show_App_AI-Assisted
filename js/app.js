@@ -171,7 +171,7 @@ async function getDefinition(word) {
 
   try {
     const response = await fetch(
-      `https://api.datamuse.com/words?sp=${word}&md=d&max=1`,
+      `https://api.datamuse.com/words?sp=${word}&md=d&max=1`
     );
 
     const data = await response.json();
